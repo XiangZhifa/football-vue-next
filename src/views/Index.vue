@@ -24,6 +24,7 @@
         console.log(count);
         count.value++
       }
+
       return {
         num,
         count,
