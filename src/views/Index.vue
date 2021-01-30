@@ -22,10 +22,33 @@
     <button @click="msg+='?!_!'">更新数据</button>
   </div>
   <child :msg="msg" msg2="真香"></child>
+
+  <h2>计算属性和监视</h2>
+  <div style="border: 1px solid #ccc;margin-bottom: 20px;padding: 16px;">
+    <div>姓名操作</div>
+    <div style="margin-top: 16px">
+      姓氏：<input v-model="nameInfo.firstName" type="text" placeholder="请输入姓氏"/>
+    </div>
+    <div style="margin-top: 16px">
+      名字：<input v-model="nameInfo.lastName" type="text" placeholder="请输入名字"/>
+    </div>
+  </div>
+  <div style="border: 1px solid #ccc;margin-bottom: 20px;padding: 16px;">
+    <div>计算属性和监视的演示</div>
+    <div style="margin-top: 16px">
+      姓名：<input v-model="fullName1" type="text" placeholder="显示姓名"/>
+    </div>
+    <div style="margin-top: 16px">
+      姓名：<input v-model="fullName2" type="text" placeholder="显示姓名"/>
+    </div>
+    <div style="margin-top: 16px">
+      姓名：<input v-model="fullName3" type="text" placeholder="显示姓名"/>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
-  import {defineComponent, ref, reactive} from 'vue';
+  import {defineComponent, ref, reactive, computed, watch, watchEffect} from 'vue';
   import Child from '../components/Child.vue';
 
   export default defineComponent({
@@ -68,13 +91,54 @@
 
       const msg = ref('What are you doing now ?');
 
+      const nameInfo = reactive({
+        firstName: '张',
+        lastName: '三'
+      });
+      //计算属性
+      //计算属性如果只传入一个函数，表示的是get(只读)
+      //返回类型是一个ref对象
+      const fullName1 = computed(() => {
+        return nameInfo.firstName + '_' + nameInfo.lastName
+      });
+      console.log(fullName1);
+
+      //传入对象包含，get和set方法
+      const fullName2 = computed({
+        get: () => {
+          return nameInfo.firstName + '_' + nameInfo.lastName
+        },
+        set: (val) => {
+          const nameArr = val.split('_');
+          nameInfo.firstName = nameArr[0];
+          nameInfo.lastName = nameArr[1];
+        }
+      });
+
+      let fullName3 = ref('');
+      //watch监视
+      watch(nameInfo, ({firstName, lastName}) => {
+        fullName3.value = firstName + '_' + lastName
+      }, {immediate: true,deep: true});
+
+      //watchEffect
+      watchEffect(()=>{
+        const nameArr = fullName3.value.split('_');
+        nameInfo.firstName = nameArr[0];
+        nameInfo.lastName = nameArr[1];
+      });
+
       return {
         num,
         count,
         updateCount,
         user,
         updateUser,
-        msg
+        msg,
+        nameInfo,
+        fullName1,
+        fullName2,
+        fullName3
       }
     },
     //!!!如果属性或方法有重名，setUp中的属性、方法优先
