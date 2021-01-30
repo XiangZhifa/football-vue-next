@@ -45,11 +45,30 @@
       姓名：<input v-model="fullName3" type="text" placeholder="显示姓名"/>
     </div>
   </div>
+
+  <h2>hooks获取鼠标点击位置</h2>
+  <div>X: {{mouseX}}</div>
+  <div>Y: {{mouseY}}</div>
 </template>
 
 <script lang="ts">
-  import {defineComponent, ref, reactive, computed, watch, watchEffect, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted} from 'vue';
+  import {
+    defineComponent,
+    ref,
+    reactive,
+    computed,
+    watch,
+    watchEffect,
+    onBeforeMount,
+    onMounted,
+    onBeforeUpdate,
+    onUpdated,
+    onBeforeUnmount,
+    onUnmounted
+  } from 'vue';
+  import getMousePosition from '../hooks/getMousePosition';
   import Child from '../components/Child.vue';
+
 
   export default defineComponent({
     name: 'Index',
@@ -119,10 +138,10 @@
       //watch监视
       watch(nameInfo, ({firstName, lastName}) => {
         fullName3.value = firstName + '_' + lastName
-      }, {immediate: true,deep: true});
+      }, {immediate: true, deep: true});
 
       //watchEffect
-      watchEffect(()=>{
+      watchEffect(() => {
         const nameArr = fullName3.value.split('_');
         nameInfo.firstName = nameArr[0];
         nameInfo.lastName = nameArr[1];
@@ -132,21 +151,24 @@
       onBeforeMount(() => {
         console.log('Vue 3.x中的onBeforeMount')
       });
-      onMounted(()=>{
+      onMounted(() => {
         console.log('Vue 3.x中的onMounted')
       });
-      onBeforeUpdate(()=>{
+      onBeforeUpdate(() => {
         console.log('Vue 3.x中的onBeforeUpdate')
       });
-      onUpdated(()=>{
+      onUpdated(() => {
         console.log('Vue 3.x中的onUpdated')
       });
-      onBeforeUnmount(()=>{
+      onBeforeUnmount(() => {
         console.log('Vue 3.x中的onBeforeUnmount')
       });
-      onUnmounted(()=>{
+      onUnmounted(() => {
         console.log('Vue 3.x中的onUnmounted')
       });
+
+      //引入封装好的hooks
+      const {mouseX, mouseY} = getMousePosition();
 
       return {
         num,
@@ -158,7 +180,9 @@
         nameInfo,
         fullName1,
         fullName2,
-        fullName3
+        fullName3,
+        mouseX,
+        mouseY
       }
     },
     //!!!如果属性或方法有重名，setUp中的属性、方法优先
