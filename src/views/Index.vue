@@ -21,7 +21,7 @@
   <div>
     <button @click="msg+='?!_!'">更新数据</button>
   </div>
-  <child :msg="msg"></child>
+  <child :msg="msg" msg2="真香"></child>
 </template>
 
 <script lang="ts">
@@ -34,7 +34,9 @@
       Child
     },
     //setUp函数是组合式api的入口函数
-    setup() {
+    //!!!尽量不要混合使用setUp和data，setUp和methods
+    //!!!在setUp方法中，无法访问data和methods中的属性
+    setup(props, context) {
       const num = 10;
       //ref函数，定义一个响应式数据，返回reference对象，对象中包含value属性，通过操作value属性，实现双向绑定
       //ref一般用来定义基本数据类型的响应式数据
@@ -58,7 +60,7 @@
 
       function updateUser() {
         user.name = '小张';
-        user.age+=3;
+        user.age += 3;
         user.friend.name = '小李';
         user.friend.cars[0] = '玛莎拉蒂';
         user.friend.cars.push('法拉利');
@@ -74,6 +76,16 @@
         updateUser,
         msg
       }
+    },
+    //!!!如果属性或方法有重名，setUp中的属性、方法优先
+    data() {
+      return {
+        count: 10086
+      }
+    },
+    mounted() {
+      console.log(this);
+      console.log(this.count);
     }
   })
 </script>
