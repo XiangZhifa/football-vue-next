@@ -49,6 +49,14 @@
   <h2>hooks获取鼠标点击位置</h2>
   <div>X: {{mouseX}}</div>
   <div>Y: {{mouseY}}</div>
+
+  <h2>hooks发送请求</h2>
+  <div v-if="loading">正在加载中……</div>
+  <div v-else>{{data || errorMsg}}</div>
+
+  <h2>toRefs使用</h2>
+  <div>{{name}}</div>
+  <div>{{age}}</div>
 </template>
 
 <script lang="ts">
@@ -56,6 +64,7 @@
     defineComponent,
     ref,
     reactive,
+    toRefs,
     computed,
     watch,
     watchEffect,
@@ -67,6 +76,7 @@
     onUnmounted
   } from 'vue';
   import getMousePosition from '../hooks/getMousePosition';
+  import sendRequest from '../hooks/sendRequest';
   import Child from '../components/Child.vue';
 
 
@@ -170,6 +180,17 @@
       //引入封装好的hooks
       const {mouseX, mouseY} = getMousePosition();
 
+      const {loading, data, errorMsg} = sendRequest('地址1');
+
+      //toRefs将每个非响应式数据，转化为响应式数据
+      const wuXia = reactive({
+        name: '自来也',
+        age: 20
+      });
+      const wuXiaRef = toRefs(wuXia);
+      setTimeout(()=>{wuXia.name+='!!!'},5000);
+
+
       return {
         num,
         count,
@@ -182,7 +203,15 @@
         fullName2,
         fullName3,
         mouseX,
-        mouseY
+        mouseY,
+        loading,
+        data,
+        errorMsg,
+        //直接解构赋值会导致响应式数据，变成非响应式数据
+        // ...wuXia,
+        //需要使用toRefs解构
+        ...wuXiaRef
+
       }
     },
     //!!!如果属性或方法有重名，setUp中的属性、方法优先
