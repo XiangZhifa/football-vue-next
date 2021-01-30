@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, ref, reactive, computed, watch, watchEffect} from 'vue';
+  import {defineComponent, ref, reactive, computed, watch, watchEffect, onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted} from 'vue';
   import Child from '../components/Child.vue';
 
   export default defineComponent({
@@ -126,6 +126,26 @@
         const nameArr = fullName3.value.split('_');
         nameInfo.firstName = nameArr[0];
         nameInfo.lastName = nameArr[1];
+      });
+
+      //Vue3中的生命周期
+      onBeforeMount(() => {
+        console.log('Vue 3.x中的onBeforeMount')
+      });
+      onMounted(()=>{
+        console.log('Vue 3.x中的onMounted')
+      });
+      onBeforeUpdate(()=>{
+        console.log('Vue 3.x中的onBeforeUpdate')
+      });
+      onUpdated(()=>{
+        console.log('Vue 3.x中的onUpdated')
+      });
+      onBeforeUnmount(()=>{
+        console.log('Vue 3.x中的onBeforeUnmount')
+      });
+      onUnmounted(()=>{
+        console.log('Vue 3.x中的onUnmounted')
       });
 
       return {
