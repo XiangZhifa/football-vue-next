@@ -65,24 +65,51 @@
   <p>shallowRef: {{s4}}</p>
   <button @click="updateData">更新数据</button>
 
-  <h2>readonly和shallowReadonly</h2>
+  <h2>readonly 和 shallowReadonly</h2>
   <p>state: {{stateData}}</p>
   <button @click="updateStateData">更新数据</button>
+
+  <h2>toRaw 和 markRaw</h2>
+  <p>rawData: {{rawData}}</p>
+  <button @click="testToRaw">测试toRaw</button>
+  <button @click="testMarkRaw" style="margin-left:20px">测试markRaw</button>
+
+  <h2>toRef的使用</h2>
+  <p>state: {{toRefData}}</p>
+  <p>age: {{age}}</p>
+  <p>money: {{money}}</p>
+  <button @click="updateToRefData">更新数据</button>
+
+  <h2>customRef的使用</h2>
+  <input v-model="keyWord" type="text"/>
+  <p>
+    keyWord: {{keyWord}}
+  </p>
+
+  <h2>响应式数据的判断</h2>
+  <p>isRef: 判断数据是否是ref对象</p>
+  <p>isReactive: 判断数据是否是reactive的响应式代理</p>
+  <p>isReadonly: 判断数据是否是readonly创建的只读代理</p>
+  <p>isProxy: 判断数据是否是 reactive 或 readonly 方法创建的代理</p>
 </template>
 
 <script lang="ts">
   import {
     defineComponent,
     ref,
+    toRef,
     reactive,
     shallowRef,
     shallowReactive,
     readonly,
     shallowReadonly,
     toRefs,
+    customRef,
     computed,
     watch,
     watchEffect,
+    toRaw,
+    markRaw,
     onBeforeMount,
     onMounted,
     onBeforeUpdate,
@@ -282,6 +309,69 @@
         // stateData2.car.name+='===';
       }
 
+      const rawData = reactive<any>({
+        name: '小明',
+        age: 20
+      });
+
+      function testToRaw() {
+        //把代理对象变成普通对象，数据变化，界面不变化
+        const user = toRaw(rawData);
+        user.name += '==';
+      }
+
+      function testMarkRaw() {
+        //markRaw标记的对象，从此以后都不能再成为代理对象
+        const likes = ['吃', '喝'];
+        rawData.likes = markRaw(likes);
+        setInterval(() => {
+          console.log('定时器执行了');
+          rawData.likes += '==';
+        })
+      }
+
+      //toRef拷贝一份数据，操作时，源数据也会随之变化；ref相当于生成新数据，操作时源数据不会发生变化
+      const toRefData = reactive({
+        age: 5,
+        money: 100
+      });
+
+      //把响应式数据 toRefData 中的 age 属性，变成ref对象
+      const age = toRef(toRefData,'age');
+      const money = ref(toRefData.money);
+
+      function updateToRefData() {
+        // toRefData.age += 2
+        // age.value += 3
+        money.value+=10
+      }
+
+      //customRef的使用
+      const keyWord = useDebouncedRef('abc',500);
+
+      function useDebouncedRef<T>(value: T, delay = 200) {
+        let timeOutId: number;
+        return customRef((track, trigger) => {
+          return {
+            get() {
+              //Vue追踪数据
+              track();
+              return value
+            },
+            set(newVal: T) {
+              //清理定时器
+              clearTimeout(timeOutId);
+              //设置定时器
+              timeOutId = setTimeout(()=>{
+                value = newVal;
+                //Vue更新数据
+                trigger();
+              },delay)
+            }
+          }
+        })
+      }
+
       return {
         num,
         count,
@@ -309,8 +399,16 @@
         updateData,
         stateData,
         stateData2,
+        stateData3,
         updateStateData,
-        stateData3
+        rawData,
+        testToRaw,
+        testMarkRaw,
+        toRefData,
+        age,
+        money,
+        updateToRefData,
+        keyWord
       }
     },
     //!!!如果属性或方法有重名，setUp中的属性、方法优先
