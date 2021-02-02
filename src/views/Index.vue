@@ -57,6 +57,17 @@
   <h2>toRefs使用</h2>
   <div>{{name}}</div>
   <div>{{age}}</div>
+
+  <h2>shallowReactive 和 shallowRef</h2>
+  <p>reactive: {{s1}}</p>
+  <p>shallowReactive: {{s2}}</p>
+  <p>ref: {{s3}}</p>
+  <p>shallowRef: {{s4}}</p>
+  <button @click="updateData">更新数据</button>
+
+  <h2>readonly和shallowReadonly</h2>
+  <p>state: {{stateData}}</p>
+  <button @click="updateStateData">更新数据</button>
 </template>
 
 <script lang="ts">
@@ -64,6 +75,10 @@
     defineComponent,
     ref,
     reactive,
+    shallowRef,
+    shallowReactive,
+    readonly,
+    shallowReadonly,
     toRefs,
     computed,
     watch,
@@ -188,8 +203,84 @@
         age: 20
       });
       const wuXiaRef = toRefs(wuXia);
-      setTimeout(()=>{wuXia.name+='!!!'},5000);
+      setTimeout(() => {
+        wuXia.name += '!!!'
+      }, 5000);
 
+      //shallowRef和shallowReactive
+      const s1 = reactive({
+        name: '张三',
+        age: 20,
+        car: {
+          name: '奔驰',
+          color: 'Blue '
+        }
+      });
+
+      const s2 = shallowReactive({
+        name: '张三',
+        age: 20,
+        car: {
+          name: '奔驰',
+          color: 'Blue '
+        }
+      });
+
+      const s3 = ref({
+        name: '张三',
+        age: 20,
+        car: {
+          name: '奔驰',
+          color: 'Blue '
+        }
+      });
+
+      const s4 = shallowRef({
+        name: '张三',
+        age: 20,
+        car: {
+          name: '奔驰',
+          color: 'Blue '
+        }
+      });
+
+      function updateData() {
+        //reactive 深度劫持
+        s1.name += '=';
+        s1.car.name += '!';
+        //shallowReactive 浅劫持
+        s2.name += '==';
+        s2.car.name += '!!';
+        //ref
+        s3.value.name += '===';
+        s3.value.car.name += '!!!';
+        //shallowRef
+        s4.value.name += '====';
+        s4.value.car.name += '!!!!';
+      }
+
+      //readonly 和 shallowReadonly
+      const stateData = reactive({
+        name: '李四',
+        age: 20,
+        car: {
+          name: '奔驰',
+          color: 'Black'
+        }
+      });
+
+      const stateData2 = readonly(stateData);
+      const stateData3 = shallowReadonly(stateData);
+
+      function updateStateData() {
+        // readonly 深度只读，无法修改数据（深层次数据也无法修改）
+        // stateData2.name+='==='
+        // stateData2.car.name+='==='
+
+        // shallowReadonly 浅只读，对深层次数据不做只读监控
+        // stateData2.name+='===';
+        // stateData2.car.name+='===';
+      }
 
       return {
         num,
@@ -210,8 +301,16 @@
         //直接解构赋值会导致响应式数据，变成非响应式数据
         // ...wuXia,
         //需要使用toRefs解构
-        ...wuXiaRef
-
+        ...wuXiaRef,
+        s1,
+        s2,
+        s3,
+        s4,
+        updateData,
+        stateData,
+        stateData2,
+        updateStateData,
+        stateData3
       }
     },
     //!!!如果属性或方法有重名，setUp中的属性、方法优先
