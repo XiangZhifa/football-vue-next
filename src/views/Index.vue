@@ -372,6 +372,77 @@
         })
       }
 
+      //自定义浅劫持，shallowReactive
+      function customShallowReactive(target) {
+        //判断传入数据是否为对象
+        if (target && typeof target === 'object') {
+          return new Proxy(target, ShallowReactiveHandler);
+        }
+      }
+
+      //shallowReactive处理器
+      const ShallowReactiveHandler = {
+        //获取属性值
+        get(target, prop) {
+          const result = Reflect.get(target, prop);
+          console.log('拦截读取数据', prop, result);
+          return result
+        },
+        //修改 或 添加 属性值
+        set(target, prop, val) {
+          const result = Reflect.set(target, prop, val);
+          console.log('拦截修改 或 添加 数据', target, prop, val);
+          return result
+        },
+        //删除某个属性
+        deleteProperty(target, prop) {
+          const result = Reflect.delete(target, prop);
+          console.log('拦截删除数据', target, prop);
+          return result
+        }
+      };
+
+      //自定义深劫持，reactive
+      function customReactive(target) {
+        //判断传入数据是否为对象
+        if (target && typeof target === 'object') {
+          //深劫持，需要对对象或数组中的所有数据进行递归处理
+          //先判断当前的数据是不是数组
+          if (Array.isArray(target)) {
+            target.forEach((item, index) => {
+              target[index] = customReactive(item)
+            })
+          } else {
+            //再判断当前的数据是不是对象
+            Object.keys(target).forEach(key => {
+              target[key] = customReactive(target[key])
+            })
+          }
+          return new Proxy(target, ReactiveHandler);
+        }
+      }
+
+      const ReactiveHandler = {
+        //获取属性值
+        get(target, prop) {
+          const result = Reflect.get(target, prop);
+          console.log('拦截读取数据', prop, result);
+          return result
+        },
+        //修改 或 添加 属性值
+        set(target, prop, val) {
+          const result = Reflect.set(target, prop, val);
+          console.log('拦截修改 或 添加 数据', target, prop, val);
+          return result
+        },
+        //删除某个属性
+        deleteProperty(target, prop) {
+          const result = Reflect.delete(target, prop);
+          console.log('拦截删除数据', target, prop);
+          return result
+        }
+      };
+      
       return {
         num,
         count,
@@ -408,7 +479,10 @@
         age,
         money,
         updateToRefData,
-        keyWord
+        keyWord,
+        customShallowReactive,
+        customReactive,
+        customShallowReadonly
       }
     },
     //!!!如果属性或方法有重名，setUp中的属性、方法优先
